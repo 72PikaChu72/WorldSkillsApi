@@ -1,7 +1,6 @@
 from sanic import Sanic, response, HTTPResponse, json, redirect, html, file
 from sanic import Sanic
 from sanic.response import text, html
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 import base64
 import database
 from datetime import datetime
