@@ -4,12 +4,162 @@ from sanic.response import text, html
 import base64
 import database
 from datetime import datetime
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 import random
 import os
 import string
 app = Sanic("WorldSkillsApi")
 
 tokens = {}
+
+env = Environment(
+    loader=FileSystemLoader('templates'),  # Папка с шаблонами
+    autoescape=select_autoescape(['html', 'xml'])
+)
+
+app.static("/static/", "./static/")
+#region pages
+@app.get('/')
+async def inventoryPage(request):
+    template = env.get_template('index.html')
+    return response.html(template.render())
+
+@app.get("/registration")
+async def registrationPage(request):
+    template = env.get_template('registration.html')
+    return response.html(template.render())
+
+@app.get("/authorization")
+async def authorizationPage(request):
+    template = env.get_template('authorization.html')
+    return response.html(template.render())
+
+@app.get('/logout')
+async def logout(request):
+    if verify_token(request):
+        del tokens[get_token(request)]
+        return json({"success": True, 'message':'Success'}, status=200)
+    else:
+        return json({"success": False, 'message':'Unauthorised'}, status=401)
+
+@app.get('/files/diskpage')
+async def diskpage(request):
+    token = request.cookies.get('bearer')
+    if not token:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    if token not in tokens:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    user = tokens[token]
+    if not user:
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+    output = []
+    for file in database.getUserFiles(user['email']):
+        accesses = database.getFileAccesses(file[0])
+        accesslist = []
+        owner = database.getUserInfoByEmail(user['email'])
+        accesslist.append({
+            "fullname": owner[2] + " " + owner[3],
+            "email": owner[0],
+            "type": "author"
+        })
+        if accesses[0]:
+            for access in accesses[0].split(':'):
+                info = database.getUserInfoByEmail(access)
+                accesslist.append({
+                    "fullname": info[2] + " " + info[3],
+                    "email": info[0],
+                    "type": "co-author"
+                })
+        output.append({
+            'file_id' : file[0],
+            'name' : file[1],
+            'url' : '/files/' + str(file[0]),
+            'accesses' : accesslist
+        })
+    
+    template = env.get_template('disk.html')
+    return response.html(template.render(data = output))
+
+@app.get('/files/sharedpage')
+async def sharedpage(request):
+    token = request.cookies.get('bearer')
+    if not token:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    if token not in tokens:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    user = tokens[token]
+    if not user:
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+    output = []
+    for file in database.getUserSharedFiles(user['email']):
+        output.append({
+            'file_id' : file[0],
+            'name' : file[1],
+            'url' : '/files/' + str(file[0])
+        })
+    template = env.get_template('shared.html')
+    return response.html(template.render(data = output))
+
+@app.get('/files/upload')
+async def uploadpage(request):
+    token = request.cookies.get('bearer')
+    if not token:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    if token not in tokens:
+        return response.json({'error': 'Unauthorised'}, status=401)
+    user = tokens[token]
+    if not user:
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+    template = env.get_template('fileupload.html')
+    return response.html(template.render())
+
+@app.get('/files/accesses/grant')
+async def accessgrantpage(request):
+    user = verify_token(request)
+    if not user:
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+    output = []
+    for file in database.getUserFiles(user['email']):
+        accesses = database.getFileAccesses(file[0])
+        accesslist = []
+        owner = database.getUserInfoByEmail(user['email'])
+        accesslist.append({
+            "fullname": owner[2] + " " + owner[3],
+            "email": owner[0],
+            "type": "author"
+        })
+        if accesses[0]:
+            for access in accesses[0].split(':'):
+                info = database.getUserInfoByEmail(access)
+                accesslist.append({
+                    "fullname": info[2] + " " + info[3],
+                    "email": info[0],
+                    "type": "co-author"
+                })
+        output.append({
+            'file_id' : file[0],
+            'name' : file[1],
+            'url' : '/files/' + str(file[0]),
+            'accesses' : accesslist
+        })
+    
+    template = env.get_template('grantaccess.html')
+    
+    return response.html(template.render(data=output))
+
+#endregion
 
 def generatetoken():
     token = base64.b64encode(datetime.now().strftime('%Y-%m-%d %H:%M:%S').encode('utf-8')).decode('utf-8')
@@ -45,12 +195,10 @@ async def authorization(request):
                     "message": "Login failed"}, status=401)
     email = request.json.get('email')
     password = request.json.get('password')
-    first_name= request.json.get('first_name')
-    last_name = request.json.get('last_name')
-    dbresp = database.loginUser(email, password, first_name, last_name)
+    dbresp = database.loginUser(email, password)
     if dbresp:
         token = generatetoken()
-        tokens[token]={'email':email,'password':password,"first_name":first_name, "first_name":last_name}
+        tokens[token]={'email':email,'password':password,"first_name":dbresp[2],"last_name":dbresp[3]}
         return json({"success": True,
                     "message": "Success",
                     "token": token}, status=200)
@@ -87,13 +235,7 @@ async def registration(request):
     tokens[token]={'email':email,'password':password,"first_name":first_name, "first_name":last_name}
     return json({"success": True, 'message':'Success', "token": token}, status=200)
 
-@app.get('/logout')
-async def logout(request):
-    if verify_token(request):
-        del tokens[get_token(request)]
-        return json({"success": True, 'message':'Success'}, status=200)
-    else:
-        return json({"success": False, 'message':'Unauthorised'}, status=401)
+
 
 def getrandomstring(length):
     return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
@@ -103,7 +245,11 @@ def getrandomstring(length):
 async def get_file(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+        
     email = database.IsUserAllowedToFile(fileid, user['email'])
     if not email:
         return response.json({'error': 'Access not allowed'}, status=403)
@@ -117,7 +263,10 @@ async def get_file(request, fileid):
 async def delete_file(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     try:
         os.remove(f"files/{user['email']}/{database.getFilenameWithFileId(fileid)}")
         database.deletefile(fileid)
@@ -129,7 +278,10 @@ async def delete_file(request, fileid):
 async def rename_file(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     email = database.IsUserAllowedToFile(fileid, user['email'])
     if not database.IsUserFileOwner(fileid, user['email']):
         return response.json({'error': 'Access not allowed'}, status=403)
@@ -146,7 +298,10 @@ async def rename_file(request, fileid):
 async def append_file_accesses(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Access not allowed'}, status=403)
     if not database.IsUserFileOwner(fileid, user['email']):
         return response.json({'error': 'Access not allowed'}, status=403)
     if not request.json:
@@ -183,7 +338,10 @@ async def append_file_accesses(request, fileid):
 async def delete_file_accesses(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     if not database.IsUserFileOwner(fileid, user['email']):
         return response.json({'error': 'Access not allowed'}, status=403)
     if not request.json:
@@ -216,7 +374,10 @@ async def delete_file_accesses(request, fileid):
 async def get_file_accesses(request, fileid):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     if not database.IsUserFileOwner(fileid, user['email']):
         return response.json({'error': 'Access not allowed'}, status=403)
     accesses=database.getFileAccesses(fileid)[0]
@@ -240,7 +401,10 @@ async def get_file_accesses(request, fileid):
 async def getUserFiles(request):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     output = []
     for file in database.getUserFiles(user['email']):
         accesses = database.getFileAccesses(file[0])
@@ -270,7 +434,10 @@ async def getUserFiles(request):
 async def getUserSharedFiles(request):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
     output = []
     for file in database.getUserSharedFiles(user['email']):
         output.append({
@@ -284,7 +451,11 @@ async def getUserSharedFiles(request):
 async def files_upload(request):
     user = verify_token(request)
     if not user:
-        return response.json({'error': 'Unauthorised'}, status=401)
+        if request.cookies.get('bearer') in tokens:
+            user = tokens[request.cookies.get('bearer')]
+        else:
+            return response.json({'error': 'Unauthorised'}, status=401)
+        
     
     if 'file' not in request.files:
         return response.json({'error': 'No file part'}, status=400)

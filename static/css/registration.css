@@ -1,0 +1,29 @@
+body {
+    background-color: #333;
+    color: white;
+    font-family: 'Open Sans', sans-serif;
+}
+
+form {
+    background-color: #444;
+    display: inline-block;
+    margin-top: 100px;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 50px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+

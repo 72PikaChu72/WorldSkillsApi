@@ -83,9 +83,9 @@ def IsUserAllowedToFile(fileid,email):
         except:
             return False
 
-def loginUser(email, password, first_name, last_name):
+def loginUser(email, password):
     with sqlite3.connect('database.db') as conn:
-        cursor = conn.execute("SELECT * FROM Users WHERE email = ? AND password = ? and first_name = ? and last_name = ?", (email, password, first_name, last_name,))
+        cursor = conn.execute("SELECT * FROM Users WHERE email = ? AND password = ?", (email, password,))
         return cursor.fetchone()
 
 def registerfile(filename:str, owneremail:str):

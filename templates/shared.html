@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared</title>
+    <link rel="stylesheet" href="/static/css/shared.css">
+</head>
+<body>
+    <table id="table" style="display: none;">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Url</th>
+        </tr>
+        {% for file in data %}
+        <tr>
+            <td>
+                {{ file['file_id'] }}
+            </td>
+            <td>
+                {{ file['name'] }}
+            </td>
+            <td>
+                <a href="{{ file['url'] }}">{{ file['url'] }}</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+<script src="/static/js/shared.js"></script>
+</html>
