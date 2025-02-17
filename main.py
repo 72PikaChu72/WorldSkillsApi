@@ -1,13 +1,15 @@
 from sanic import Sanic, response, HTTPResponse, json, redirect, html, file
 from sanic import Sanic
+from sanic_cors import CORS
 from sanic.response import text, html
 import base64
 import database
-from datetime import datetime
+from datetime import datetime, date
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import random
 import os
 import string
+import uuid
 app = Sanic("WorldSkillsApi")
 
 tokens = {}
@@ -16,6 +18,7 @@ env = Environment(
     loader=FileSystemLoader('templates'),  # Папка с шаблонами
     autoescape=select_autoescape(['html', 'xml'])
 )
+CORS(app, resources={"*": {"origins": "*"}})
 
 app.static("/static/", "./static/")
 #region pages
@@ -162,7 +165,7 @@ async def accessgrantpage(request):
 #endregion
 
 def generatetoken():
-    token = base64.b64encode(datetime.now().strftime('%Y-%m-%d %H:%M:%S').encode('utf-8')).decode('utf-8')
+    token = uuid.uuid4().hex
     return token
 
 def verify_token(request):
