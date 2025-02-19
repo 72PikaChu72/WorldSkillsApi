@@ -9,72 +9,81 @@
 <body>
 
 <header>
+    <a href="/"><button>Назад</button></a>
     <h1>API Документация</h1>
 </header>
 
 <section>
-    <h2>Общее</h2>
-    <p>Это API позволяет делиться файлами между пользователями и управлять доступами к ним</p>
-    <p>Все запросы кроме /registration и /authorization требуют передачи токена в заголовке Authorization в формате</p>
-    <pre>
+    <h2 onclick="toggleVisibility(this)">Общее</h2>
+    <div class="content">
+        <p>Это API позволяет делиться файлами между пользователями и управлять доступами к ним</p>
+        <p>Все запросы кроме /registration и /authorization требуют передачи токена в заголовке Authorization в формате</p>
+        <pre>
 Bearer your_token
-    </pre>
+        </pre>
+    </div>
 </section>
 
 <section>
-    <h2>Регистрация пользователя</h2>
-    <div class="endpoint">
-        <h3>POST /registration</h3>
-        <p>Зарегестрировать нового пользователя и получить его токен</p>
-        <p><strong>Request Body:</strong></p>
-        <pre>
+    <h2 onclick="toggleVisibility(this)">Регистрация пользователя</h2>
+    <div class="content">
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">POST {{data.url}}/registration</h3>
+            <div class="content">
+                <p>Зарегестрировать нового пользователя и получить его токен</p>
+                <p><strong>Request Body:</strong></p>
+                <pre>
 {
     "email": "newuser@example.com",
     "password": "yourpassword",
     "first_name": "First",
     "last_name": "Last"
 }
-        </pre>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 {
     "success": true,
     "message": "Success",
     "token": "your_token"
 }
-        </pre>
-    </div>
+                </pre>
+            </div>
+        </div>
 
-    <h2>Авторизация</h2>
-    <div class="endpoint">
-        <h3>POST /authorization</h3>
-        <p>Авторизовать пользователя и получить токен</p>
-        <p><strong>Request Body:</strong></p>
-        <pre>
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">POST {{data.url}}/authorization</h3>
+            <div class="content">
+                <p>Авторизовать пользователя и получить токен</p>
+                <p><strong>Request Body:</strong></p>
+                <pre>
 {
     "email": "user@example.com",
     "password": "yourpassword"
 }
-        </pre>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 {
     "success": true,
     "message": "Success",
     "token": "your_token"
 }
-        </pre>
+                </pre>
+            </div>
+        </div>
     </div>
-    
 </section>
 
 <section>
-    <h2>Управление файлами</h2>
-    <div class="endpoint">
-        <h3>GET /files/diskpage</h3>
-        <p>Получить список файлов пользователя.</p>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+    <h2 onclick="toggleVisibility(this)">Управление файлами</h2>
+    <div class="content">
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">GET {{data.url}}/files/diskpage</h3>
+            <div class="content">
+                <p>Получить список файлов пользователя.</p>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 [
     {
         "file_id": "123",
@@ -100,13 +109,16 @@ Bearer your_token
         "accesses": []
     }
 ]
-        </pre>
-    </div>
-    <div class="endpoint">
-        <h3>GET /files/sharedpage</h3>
-        <p>Получить список файлов доступных пользователю.</p>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+            </div>
+        </div>
+        
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">GET {{data.url}}/files/sharedpage</h3>
+            <div class="content">
+                <p>Получить список файлов доступных пользователю.</p>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 [
     {
         "file_id": "125",
@@ -114,14 +126,17 @@ Bearer your_token
         "url": "/files/125"
     }
 ]
-        </pre>
-    </div>
-    <div class="endpoint">
-        <h3>POST /files</h3>
-        <p>Upload a new file.</p>
-        <p><strong>Request:</strong> Загруженный файл в <code>multipart/form-data</code>.</p>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">POST {{data.url}}/files</h3>
+            <div class="content">
+                <p>Загрузить файл.</p>
+                <p><strong>Request:</strong> Загруженный файл в <code>multipart/form-data</code>.</p>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 {
     "success": true,
     "message": "Success",
@@ -129,34 +144,41 @@ Bearer your_token
     "url": "/files/123",
     "file_id": 123
 }
-        </pre>
-    </div>
-    <div class="endpoint">
-        <h3>DELETE /files/{fileid}</h3>
-        <p>Удалить файл по id.</p>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">DELETE {{data.url}}/files/{fileid}</h3>
+            <div class="content">
+                <p>Удалить файл по id.</p>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 {
     "success": true,
     "message": "Deleted"
 }
-        </pre>
+                </pre>
+            </div>
+        </div>
     </div>
 </section>
 
 <section>
-    <h2>Доступ к файлам</h2>
-    <div class="endpoint">
-        <h3>POST /files/{fileid}/accesses</h3>
-        <p>Выдать доступ к файлу пользователю используя его email.</p>
-        <p><strong>Request Body:</strong></p>
-        <pre>
+    <h2 onclick="toggleVisibility(this)">Доступ к файлам</h2>
+    <div class="content">
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">POST {{data.url}}/files/{fileid}/accesses</h3>
+            <div class="content">
+                <p>Выдать доступ к файлу пользователю используя его email.</p>
+                <p><strong>Request Body:</strong></p>
+                <pre>
 {
     "email": "coauthor@example.com"
 }
-        </pre>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 [
     {
         "fullname": "Owner Name",
@@ -169,19 +191,22 @@ Bearer your_token
         "type": "co-author"
     }
 ]
-        </pre>
-    </div>
-    <div class="endpoint">
-        <h3>DELETE /files/{fileid}/accesses</h3>
-        <p>Забрать доступ к файлу пользователя используя его email.</p>
-        <p><strong>Request Body:</strong></p>
-        <pre>
+                </pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <h3 onclick="toggleVisibility(this)">DELETE {{data.url}}/files/{fileid}/accesses</h3>
+            <div class="content">
+                <p>Забрать доступ к файлу пользователя используя его email.</p>
+                <p><strong>Request Body:</strong></p>
+                <pre>
 {
     "email": "coauthor@example.com"
 }
-        </pre>
-        <p><strong>Ответ:</strong></p>
-        <pre>
+                </pre>
+                <p><strong>Ответ:</strong></p>
+                <pre>
 [
     {
         "fullname": "Owner Name",
@@ -189,9 +214,26 @@ Bearer your_token
         "type": "author"
     }
 ]
-        </pre>
+                </pre>
+            </div>
+        </div>
     </div>
 </section>
+
+<script>
+    function toggleVisibility(element) {
+        var content = element.nextElementSibling;
+        var section = element.closest("section");
+        var endpoints = section.querySelectorAll("h3");
+        var allContent = section.querySelectorAll(".content");
+        
+        // Toggle content visibility
+        content.classList.toggle("open");
+        
+        // Toggle arrow
+        element.classList.toggle("open");
+    }
+</script>
 
 </body>
 </html>

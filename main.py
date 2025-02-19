@@ -29,8 +29,11 @@ async def inventoryPage(request):
 
 @app.get('/documentation')
 async def documentationPage(request):
+    data = {
+        'url':request.url.removesuffix('/documentation')
+    }
     template = env.get_template('documentation.html')
-    return response.html(template.render())
+    return response.html(template.render(data=data))
 
 @app.get("/registration")
 async def registrationPage(request):
