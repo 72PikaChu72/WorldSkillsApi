@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Документация</title>
+    <link rel="stylesheet" href="/static/css/documentation.css">
+</head>
+<body>
+
+<header>
+    <h1>API Документация</h1>
+</header>
+
+<section>
+    <h2>Общее</h2>
+    <p>Это API позволяет делиться файлами между пользователями и управлять доступами к ним</p>
+    <p>Все запросы кроме /registration и /authorization требуют передачи токена в заголовке Authorization в формате</p>
+    <pre>
+Bearer your_token
+    </pre>
+</section>
+
+<section>
+    <h2>Регистрация пользователя</h2>
+    <div class="endpoint">
+        <h3>POST /registration</h3>
+        <p>Зарегестрировать нового пользователя и получить его токен</p>
+        <p><strong>Request Body:</strong></p>
+        <pre>
+{
+    "email": "newuser@example.com",
+    "password": "yourpassword",
+    "first_name": "First",
+    "last_name": "Last"
+}
+        </pre>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+{
+    "success": true,
+    "message": "Success",
+    "token": "your_token"
+}
+        </pre>
+    </div>
+
+    <h2>Авторизация</h2>
+    <div class="endpoint">
+        <h3>POST /authorization</h3>
+        <p>Авторизовать пользователя и получить токен</p>
+        <p><strong>Request Body:</strong></p>
+        <pre>
+{
+    "email": "user@example.com",
+    "password": "yourpassword"
+}
+        </pre>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+{
+    "success": true,
+    "message": "Success",
+    "token": "your_token"
+}
+        </pre>
+    </div>
+    
+</section>
+
+<section>
+    <h2>Управление файлами</h2>
+    <div class="endpoint">
+        <h3>GET /files/diskpage</h3>
+        <p>Получить список файлов пользователя.</p>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+[
+    {
+        "file_id": "123",
+        "name": "file1.txt",
+        "url": "/files/123",
+        "accesses": [
+            {
+                "fullname": "Owner Name",
+                "email": "owner@example.com",
+                "type": "author"
+            },
+            {
+                "fullname": "Co-Author Name",
+                "email": "coauthor@example.com",
+                "type": "co-author"
+            }
+        ]
+    },
+    {
+        "file_id": "124",
+        "name": "file2.txt",
+        "url": "/files/124",
+        "accesses": []
+    }
+]
+        </pre>
+    </div>
+    <div class="endpoint">
+        <h3>GET /files/sharedpage</h3>
+        <p>Получить список файлов доступных пользователю.</p>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+[
+    {
+        "file_id": "125",
+        "name": "shared_file.txt",
+        "url": "/files/125"
+    }
+]
+        </pre>
+    </div>
+    <div class="endpoint">
+        <h3>POST /files</h3>
+        <p>Upload a new file.</p>
+        <p><strong>Request:</strong> Загруженный файл в <code>multipart/form-data</code>.</p>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+{
+    "success": true,
+    "message": "Success",
+    "name": "file_name.txt",
+    "url": "/files/123",
+    "file_id": 123
+}
+        </pre>
+    </div>
+    <div class="endpoint">
+        <h3>DELETE /files/{fileid}</h3>
+        <p>Удалить файл по id.</p>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+{
+    "success": true,
+    "message": "Deleted"
+}
+        </pre>
+    </div>
+</section>
+
+<section>
+    <h2>Доступ к файлам</h2>
+    <div class="endpoint">
+        <h3>POST /files/{fileid}/accesses</h3>
+        <p>Выдать доступ к файлу пользователю используя его email.</p>
+        <p><strong>Request Body:</strong></p>
+        <pre>
+{
+    "email": "coauthor@example.com"
+}
+        </pre>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+[
+    {
+        "fullname": "Owner Name",
+        "email": "owner@example.com",
+        "type": "author"
+    },
+    {
+        "fullname": "Co-Author Name",
+        "email": "coauthor@example.com",
+        "type": "co-author"
+    }
+]
+        </pre>
+    </div>
+    <div class="endpoint">
+        <h3>DELETE /files/{fileid}/accesses</h3>
+        <p>Забрать доступ к файлу пользователя используя его email.</p>
+        <p><strong>Request Body:</strong></p>
+        <pre>
+{
+    "email": "coauthor@example.com"
+}
+        </pre>
+        <p><strong>Ответ:</strong></p>
+        <pre>
+[
+    {
+        "fullname": "Owner Name",
+        "email": "owner@example.com",
+        "type": "author"
+    }
+]
+        </pre>
+    </div>
+</section>
+
+</body>
+</html>

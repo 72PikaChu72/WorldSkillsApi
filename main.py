@@ -27,6 +27,11 @@ async def inventoryPage(request):
     template = env.get_template('index.html')
     return response.html(template.render())
 
+@app.get('/documentation')
+async def documentationPage(request):
+    template = env.get_template('documentation.html')
+    return response.html(template.render())
+
 @app.get("/registration")
 async def registrationPage(request):
     template = env.get_template('registration.html')
