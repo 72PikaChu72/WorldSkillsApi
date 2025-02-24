@@ -1,2 +1,4 @@
 sanic
 jinja2
+pillow
+sanic_cors
