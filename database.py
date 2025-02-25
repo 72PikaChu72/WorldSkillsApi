@@ -125,9 +125,6 @@ class Database:
                 impact_velocity_mps INT
             );
             ''')
-
-        print('Database and tables created successfully!')
-        
 #region Методы
 
     @staticmethod
@@ -144,7 +141,10 @@ class Database:
         '''
         conn = Database.connect_db()
         cursor = conn.cursor()
-
+        cursor.execute('SELECT * FROM missions')
+        res = cursor.fetchone()
+        if res:
+            return
         # 1. Вставляем данные о миссии
         cursor.execute('''INSERT INTO missions (name, launch_date, landing_date, launch_site_id, landing_site_id, flight_id)
                         VALUES (?, ?, ?, ?, ?, ? )''', 
@@ -383,12 +383,9 @@ class Database:
             ]
         }
         return output
-
-
 #endregion
 
 # Вызов функции для инициализации базы данных
-#Database.start_database()
-#
-#Database.insert_data()
+Database.start_database()
+Database.insert_data()
 #print(Database.get_gagarin_mission())
